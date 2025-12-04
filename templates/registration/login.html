@@ -1,0 +1,54 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<div class="min-h-screen flex items-center justify-center bg-gray-900 py-12 px-4">
+    <div class="bg-gray-800 shadow-2xl rounded-xl p-10 w-full max-w-md animate__animated animate__fadeInDown">
+
+        <h2 class="text-3xl font-bold text-center mb-6 text-blue-400">
+            Login
+        </h2>
+
+        <form method="post" class="space-y-5">
+            {% csrf_token %}
+
+            {% for field in form %}
+            <div>
+                <label class="block mb-1 text-gray-300 font-semibold">
+                    {{ field.label }}
+                </label>
+
+                <input
+                    type="{{ field.field.widget.input_type }}"
+                    name="{{ field.name }}"
+                    value="{{ field.value|default:'' }}"
+                    class="w-full p-3 bg-gray-700 text-white rounded-xl border border-gray-600
+                           focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition-all"
+                >
+
+                {% if field.errors %}
+                <p class="text-red-500 text-sm mt-1">
+                    {{ field.errors|striptags }}
+                </p>
+                {% endif %}
+            </div>
+            {% endfor %}
+
+            <button
+                class="w-full bg-blue-600 text-white py-3 rounded-xl text-lg font-semibold
+                       hover:bg-blue-700 hover:shadow-xl transition-all duration-300">
+                Login
+            </button>
+        </form>
+
+        <p class="text-center text-gray-300 mt-5">
+            Don't have an account?
+            <a href="{% url 'register' %}" class="text-blue-400 font-semibold hover:underline">
+                Register here
+            </a>
+        </p>
+
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,108 @@
+{% load static tailwind_tags %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        {% block title %}
+        Ahsan Twitter
+        {% endblock %}
+    </title>
+    <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">
+    {% tailwind_css %}
+    <link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+
+</head>
+<body class="bg-[#111827] text-white">
+
+<!-- NAVBAR -->
+<nav class="bg-gray-900 text-white px-6 py-4">
+  <div class="max-w-7xl mx-auto flex items-center justify-between">
+
+    <!-- Left Menu -->
+    <div class="flex items-center space-x-6">
+      <button id="menuBtn" class="md:hidden focus:outline-none">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none"
+          viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+
+      <ul class="hidden md:flex space-x-6 text-lg">
+        <li><a href="{% url 'tweet_list' %}" class="hover:text-gray-300">Home</a></li>
+        <li><a href="#" class="hover:text-gray-300">Link</a></li>
+        <li><a href="#" class="hover:text-gray-300">Dropdown</a></li>
+      </ul>
+    </div>
+    
+
+    <!-- Right Search -->
+    <div class="hidden md:flex items-center space-x-4">
+
+  <!-- Search -->
+  <input type="text" placeholder="Search"
+    class="px-3 py-1 rounded bg-gray-800 border border-gray-700 focus:outline-none" />
+  <button class="bg-blue-600 px-4 py-1 rounded hover:bg-blue-700">
+    Search
+  </button>
+
+  <!-- Home -->
+  <a href="{% url 'tweet_list' %}" 
+     class="bg-green-600 px-4 py-1 rounded hover:bg-green-700 text-white">
+    Home
+  </a>
+
+  <!-- Tweet Create -->
+  <a href="{% url 'tweet_create' %}" 
+     class="bg-yellow-600 px-4 py-1 rounded hover:bg-yellow-700 text-white">
+    Tweet
+  </a>
+
+  <!-- Logout / Login (Django condition) -->
+  {% if user.is_authenticated %}
+      <form action="{% url 'logout' %}" method="post">
+    {% csrf_token %}
+    <button class="bg-red-600 px-4 py-1 rounded hover:bg-red-700 text-white">
+        Logout
+    </button>
+</form>
+  {% else %}
+      <a href="{% url 'login' %}" 
+         class="bg-blue-500 px-4 py-1 rounded hover:bg-blue-600 text-white">
+        Login
+      </a>
+  {% endif %}
+
+</div>
+
+
+    <!-- Mobile Search Button -->
+    <button class="md:hidden">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none"
+        viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+      </svg>
+    </button>
+
+  </div>
+
+  <!-- Mobile Menu -->
+  <div id="mobileMenu" class="md:hidden hidden mt-3 space-y-3">
+    <a href="/" class="block hover:text-gray-300">Home</a>
+    <a href="#" class="block hover:text-gray-300">Link</a>
+    <a href="#" class="block hover:text-gray-300">Dropdown</a>
+  </div>
+</nav>
+
+<!-- MAIN PAGE CONTENT -->
+<main class="p-6">
+    {% block content %}
+    {% endblock %}
+</main>
+
+</body>
+</html>

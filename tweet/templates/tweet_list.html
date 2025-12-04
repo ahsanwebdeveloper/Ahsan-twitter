@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% load linkify %}
+{% load custom_filters %}
 
 {% block title %}
 Home - Ahsan Twitter
@@ -10,7 +10,9 @@ Home - Ahsan Twitter
      welcome to my Ahsan tweet
 </h1>
 
-<a class='text-white bg-gradient-to-r from-cyan-500 to-blue-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-cyan-300 font-medium rounded-base text-sm px-4 py-2.5 text-center leading-5 mt-4 ml-6 inline-block rounded-xl' 
+<a class='text-white bg-gradient-to-r from-cyan-500 to-blue-500 hover:bg-gradient-to-bl 
+focus:ring-4 focus:outline-none focus:ring-cyan-300 font-medium rounded-base text-sm px-4 
+py-2.5 text-center leading-5 mt-4 ml-6 inline-block rounded-xl' 
    href="{% url 'tweet_create' %}">
    Create a tweet
 </a>
@@ -29,10 +31,10 @@ Home - Ahsan Twitter
 
             <!-- Tweet Text -->
             <p id="text-{{ tweet.id }}" class="text-gray-300 line-clamp-3 overflow-hidden">
-                {{ tweet.text|urlize|safe }}
+                {{ tweet.text|linkify_text }}
             </p>
 
-            <!-- Show More / Less -->
+            <!-- Show More / Less Button -->
             <a href="#" class="text-blue-400 underline show-more" data-id="{{ tweet.id }}">
                 Show more
             </a>
@@ -58,7 +60,8 @@ Home - Ahsan Twitter
     </div>
 </div>
 
-<!-- JS: Fix Show More/Less -->
+
+<!-- JS: Toggle Show More / Show Less -->
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     document.querySelectorAll(".show-more").forEach(btn => {
@@ -67,15 +70,15 @@ document.addEventListener("DOMContentLoaded", function () {
             e.preventDefault();
 
             const id = this.dataset.id;
-            const text = document.querySelector("#text-" + id);
+            const text = document.getElementById("text-" + id);
 
             if (text.classList.contains("expanded")) {
-                // Collapse
+                // COLLPASE
                 text.classList.remove("expanded");
                 text.classList.add("line-clamp-3");
                 this.innerText = "Show more";
             } else {
-                // Expand
+                // EXPAND
                 text.classList.remove("line-clamp-3");
                 text.classList.add("expanded");
                 this.innerText = "Show less";
@@ -86,10 +89,13 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 </script>
 
+<!-- CSS to remove clamp when expanded -->
 <style>
 .expanded {
-    -webkit-line-clamp: unset !important;
     display: block !important;
+    -webkit-line-clamp: initial !important;
+    -webkit-box-orient: initial !important;
+    overflow: visible !important;
 }
 </style>
 

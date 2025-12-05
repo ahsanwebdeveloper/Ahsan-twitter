@@ -1,9 +1,10 @@
 from django.shortcuts import render
-from .models import Tweet
+from .models import Tweet,Comment
 from .forms import TweetForm , UserRegisterForm
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login
+from django.http import JsonResponse
 
 # Create your views here.
 def index(request):
@@ -60,3 +61,38 @@ def registration(request):
         form = UserRegisterForm()
     return render(request, 'registration/register.html', {'form':form })
 
+@login_required
+def like_tweet(request, id):
+    tweet = Tweet.objects.get(id=id)
+
+    if request.user in tweet.likes.all():
+        tweet.likes.remove(request.user)
+        liked = False
+    else:
+        tweet.likes.add(request.user)
+        liked = True
+
+    return JsonResponse({
+        "liked": liked,
+        "total_likes": tweet.likes.count()
+    })
+
+
+@login_required
+def comment_tweet(request, id):
+    if request.method == "POST":
+        text = request.POST.get("text")
+        tweet = Tweet.objects.get(id=id)
+
+        c = Comment.objects.create(
+            tweet=tweet,
+            user=request.user,
+            text=text
+        )
+
+        return JsonResponse({
+            "user": c.user.username,
+            "text": c.text
+        })
+
+    return JsonResponse({"error": "Invalid request"})

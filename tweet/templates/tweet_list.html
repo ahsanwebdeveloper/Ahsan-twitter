@@ -23,7 +23,9 @@ py-2.5 text-center leading-5 mt-4 ml-6 inline-block rounded-xl'
         {% for tweet in tweets %}
         <div class="bg-neutral-primary-soft block max-w-sm p-6 border border-gray-700 rounded-base shadow-xs">
 
+            {% if tweet.photo %}
             <img class="rounded-base w-full" src="{{ tweet.photo.url }}" alt="Tweet Image" />
+            {% endif %}
 
             <h5 class="mt-6 mb-2 text-2xl font-semibold tracking-tight text-white">
                 {{ tweet.user.username }}
@@ -38,6 +40,64 @@ py-2.5 text-center leading-5 mt-4 ml-6 inline-block rounded-xl'
             <a href="#" class="text-blue-400 underline show-more" data-id="{{ tweet.id }}">
                 Show more
             </a>
+
+
+            <!--  LIKE / COMMENT / SHARE SECTION  -->
+            <div class="flex items-center gap-6 mt-4 text-gray-300">
+
+                <!-- LIKE BUTTON -->
+                <button onclick="likeTweet({{ tweet.id }})"
+                        id="like-btn-{{ tweet.id }}"
+                        class="flex items-center gap-1 hover:text-red-500 transition">
+
+                    {% if user in tweet.likes.all %}
+                        <span>❤️</span>
+                    {% else %}
+                        <span>🤍</span>
+                    {% endif %}
+
+                    <span id="like-count-{{ tweet.id }}">{{ tweet.likes.count }}</span>
+                </button>
+
+                <!-- COMMENT BUTTON -->
+                <button onclick="toggleComment({{ tweet.id }})"
+                        class="flex items-center gap-1 hover:text-blue-400 transition">
+                    💬 Comment
+                </button>
+
+                <!-- SHARE BUTTON -->
+                <button onclick="shareTweet('{{ request.build_absolute_uri }}tweet/{{ tweet.id }}/')"
+                        class="flex items-center gap-1 hover:text-green-400 transition">
+                    🔗 Share
+                </button>
+
+            </div>
+
+
+            <!-- COMMENT BOX -->
+            <div id="comment-box-{{ tweet.id }}" class="hidden mt-3">
+
+                <textarea id="comment-input-{{ tweet.id }}"
+                          class="w-full p-2 bg-gray-800 text-gray-200 rounded"
+                          placeholder="Write a comment..."></textarea>
+
+                <button onclick="postComment({{ tweet.id }})"
+                        class="mt-2 bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700">
+                    Post
+                </button>
+
+                <!-- COMMENTS LIST -->
+                <div id="comments-{{ tweet.id }}" class="mt-3 space-y-2">
+                    {% for c in tweet.comments.all %}
+                        <div class="p-2 bg-gray-700 rounded">
+                            <strong>{{ c.user.username }}</strong>: {{ c.text }}
+                        </div>
+                    {% endfor %}
+                </div>
+
+            </div>
+
+
 
             <!-- Edit / Delete -->
             {% if tweet.user == user %}
@@ -61,7 +121,7 @@ py-2.5 text-center leading-5 mt-4 ml-6 inline-block rounded-xl'
 </div>
 
 
-<!-- JS: Toggle Show More / Show Less -->
+<!--  Show More / Less JS -->
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     document.querySelectorAll(".show-more").forEach(btn => {
@@ -73,12 +133,10 @@ document.addEventListener("DOMContentLoaded", function () {
             const text = document.getElementById("text-" + id);
 
             if (text.classList.contains("expanded")) {
-                // COLLPASE
                 text.classList.remove("expanded");
                 text.classList.add("line-clamp-3");
                 this.innerText = "Show more";
             } else {
-                // EXPAND
                 text.classList.remove("line-clamp-3");
                 text.classList.add("expanded");
                 this.innerText = "Show less";
@@ -89,7 +147,6 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 </script>
 
-<!-- CSS to remove clamp when expanded -->
 <style>
 .expanded {
     display: block !important;
@@ -98,5 +155,66 @@ document.addEventListener("DOMContentLoaded", function () {
     overflow: visible !important;
 }
 </style>
+
+
+<!--  AJAX LIKE / COMMENT / SHARE CODE -->
+<script>
+function getCSRFToken() {
+    return document.querySelector('[name=csrfmiddlewaretoken]').value;
+}
+
+// LIKE
+function likeTweet(id) {
+    fetch(`/tweet/${id}/like/`, {
+        method: "POST",
+        headers: { "X-CSRFToken": getCSRFToken() }
+    })
+    .then(res => res.json())
+    .then(data => {
+        const btn = document.getElementById(`like-btn-${id}`);
+        const count = document.getElementById(`like-count-${id}`);
+
+        btn.children[0].innerText = data.liked ? "❤️" : "🤍";
+        count.innerText = data.total_likes;
+    });
+}
+
+// COMMENT TOGGLE
+function toggleComment(id) {
+    document.getElementById(`comment-box-${id}`).classList.toggle("hidden");
+}
+
+// POST COMMENT (AJAX)
+function postComment(id) {
+    const text = document.getElementById(`comment-input-${id}`).value;
+
+    fetch(`/tweet/${id}/comment/`, {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": getCSRFToken(),
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: `text=${text}`
+    })
+    .then(res => res.json())
+    .then(data => {
+        const div = document.getElementById(`comments-${id}`);
+
+        div.innerHTML += `
+            <div class="p-2 bg-gray-700 rounded">
+                <strong>${data.user}</strong>: ${data.text}
+            </div>
+        `;
+
+        document.getElementById(`comment-input-${id}`).value = "";
+    });
+}
+
+// SHARE
+function shareTweet(url) {
+    navigator.clipboard.writeText(url);
+    alert("Tweet link copied!");
+}
+</script>
 
 {% endblock %}

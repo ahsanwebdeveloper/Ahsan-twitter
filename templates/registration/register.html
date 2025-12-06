@@ -9,37 +9,60 @@
             Register
         </h2>
 
-        <form method="post" class="space-y-5">
-            {% csrf_token %}
+        <form method="post" enctype="multipart/form-data" class="space-y-5">
+    {% csrf_token %}
 
-            {% for field in form %}
-            <div>
-                <label class="block mb-1 text-gray-300 font-semibold">
-                    {{ field.label }}
-                </label>
+    {# USER FORM FIELDS #}
+    {% for field in form %}
+    <div>
+        <label class="block mb-1 text-gray-300 font-semibold">
+            {{ field.label }}
+        </label>
 
-                <input
-                    type="{{ field.field.widget.input_type }}"
-                    name="{{ field.name }}"
-                    value="{{ field.value|default:'' }}"
-                    class="w-full p-3 bg-gray-700 text-white rounded-xl border border-gray-600
-                           focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition-all"
-                >
+        <input
+            type="{{ field.field.widget.input_type }}"
+            name="{{ field.name }}"
+            value="{{ field.value|default:'' }}"
+            class="w-full p-3 bg-gray-700 text-white rounded-xl border border-gray-600
+                   focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition-all"
+        >
 
-                {% if field.errors %}
-                <p class="text-red-500 text-sm mt-1">
-                    {{ field.errors|striptags }}
-                </p>
-                {% endif %}
-            </div>
-            {% endfor %}
+        {% if field.errors %}
+        <p class="text-red-500 text-sm mt-1">
+            {{ field.errors|striptags }}
+        </p>
+        {% endif %}
+    </div>
+    {% endfor %}
 
-            <button
-                class="w-full bg-blue-600 text-white py-3 rounded-xl text-lg font-semibold
-                       hover:bg-blue-700 hover:shadow-xl transition-all duration-300">
-                Register
-            </button>
-        </form>
+    {# PROFILE FORM FIELD (IMAGE UPLOAD) #}
+    {% for field in profile_form %}
+    <div>
+        <label class="block mb-1 text-gray-300 font-semibold">
+            {{ field.label }}
+        </label>
+
+        <input
+            type="file"
+            name="{{ field.name }}"
+            class="w-full p-3 bg-gray-700 text-white rounded-xl border border-gray-600
+                   focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition-all"
+        >
+
+        {% if field.errors %}
+        <p class="text-red-500 text-sm mt-1">
+            {{ field.errors|striptags }}
+        </p>
+        {% endif %}
+    </div>
+    {% endfor %}
+
+    <button
+        class="w-full bg-blue-600 text-white py-3 rounded-xl text-lg font-semibold
+               hover:bg-blue-700 hover:shadow-xl transition-all duration-300">
+        Register
+    </button>
+</form>
 
         <p class="text-center text-gray-300 mt-5">
             Already have an account?

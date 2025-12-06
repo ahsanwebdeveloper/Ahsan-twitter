@@ -1,5 +1,18 @@
+# admin.py
 from django.contrib import admin
-from .models import Tweet
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib.auth.models import User
+from .models import Profile
 
-# Register your models here.
-admin.site.register(Tweet)
+class ProfileInline(admin.StackedInline):
+    model = Profile
+    can_delete = False
+    verbose_name_plural = 'Profile'
+
+class UserAdmin(BaseUserAdmin):
+    inlines = (ProfileInline,)
+
+# Unregister the original User admin and register the new one
+admin.site.unregister(User)
+admin.site.register(User, UserAdmin)
+admin.site.register(Profile)

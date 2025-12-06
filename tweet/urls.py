@@ -9,7 +9,8 @@ urlpatterns = [
    path('register/', views.registration, name='register'),
    path("<int:id>/like/", views.like_tweet, name="like_tweet"),
    path("<int:id>/comment/", views.comment_tweet, name="comment_tweet"),
-
+   path("live-search/", views.live_search, name="live_search"),
+   path('user/<str:username>/', views.profile_view, name='profile'),
 
 
 ]

@@ -1,10 +1,14 @@
 from django.shortcuts import render
 from .models import Tweet,Comment
-from .forms import TweetForm , UserRegisterForm
+from .forms import ProfileForm, TweetForm , UserRegisterForm
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login
 from django.http import JsonResponse
+from django.db.models import Q
+from tweet.models import Tweet
+from django.contrib.auth.models import User
+from .models import Profile
 
 # Create your views here.
 def index(request):
@@ -46,20 +50,38 @@ def tweet_delete(request, tweet_id):
         return redirect('tweet_list')
     return render(request, 'tweet_confirm_delete.html', {'tweet': tweet})
 
+def profile_view(request, username):
+    user = get_object_or_404(User, username=username)
+    profile = user.profile
 
+    tweets = Tweet.objects.filter(user=user).order_by('-created_at')
+
+    return render(request, "user_profile.html", {
+        "profile": profile,
+        "tweets": tweets
+    })
+    
 def registration(request):
     if request.method == 'POST':
         form = UserRegisterForm(request.POST)
-        if form.is_valid():
+        profile_form = ProfileForm(request.POST, request.FILES)
+        if form.is_valid() and profile_form.is_valid():
             user = form.save(commit=False)
             user.set_password(form.cleaned_data['password1'])
             user.save()
+            profile = profile_form.save(commit=False)
+            profile.user = user
+            profile.save()
             login(request, user)
             
             return redirect('tweet_list')
     else:
         form = UserRegisterForm()
-    return render(request, 'registration/register.html', {'form':form })
+        profile_form = ProfileForm()
+
+    return render(request, 'registration/register.html', {'form':form ,'profile_form': profile_form})
+
+
 
 @login_required
 def like_tweet(request, id):
@@ -96,3 +118,22 @@ def comment_tweet(request, id):
         })
 
     return JsonResponse({"error": "Invalid request"})
+
+# searching view point
+
+def live_search(request):
+    q = request.GET.get('q', '')
+
+    posts = Tweet.objects.filter(
+        Q(user__username__icontains=q) |
+        Q(text__icontains=q)
+    )
+
+    data = []
+    for p in posts:
+        data.append({
+            "username": p.user.username,
+            "text": p.text,
+        })
+
+    return JsonResponse({"posts": data})
